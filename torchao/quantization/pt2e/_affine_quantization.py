@@ -333,12 +333,7 @@ def quantize_affine(
       output_dtype (torch.dtype): requested dtype (e.g. torch.uint8) for output Tensor
       quant_min (Optional[int]): minimum quantized value for output Tensor, if not specified, it will be derived from dtype
       quant_max (Optional[int]): maximum quantized value for output Tensor, if not specified, it will be derived from dtype
-      zero_point_domain (ZeroPointDomain): the domain that zero_point is in, should be either integer or float
-        if zero_point is in integer domain, zero point is added to the quantized integer value during
-        quantization
-        if zero_point is in floating point domain, zero point is subtracted from the floating point (unquantized)
-        value during quantization
-        default is ZeroPointDomain.INT
+      {zero_point_domain_desc}
 
     Note:
       How can block_size represent different granularities?
@@ -355,7 +350,7 @@ def quantize_affine(
 
     Output:
       quantized tensor with requested dtype
-    """
+    """.format(zero_point_domain_desc=ZeroPointDomain.PARAM_DESC)
     return _quantize_affine(
         input,
         block_size,
@@ -492,16 +487,11 @@ def dequantize_affine(
       quant_min (Optional[int]): minimum quantized value for input Tensor
       quant_max (Optional[int]): maximum quantized value for input Tensor
       output_dtype (torch.dtype): dtype for output Tensor, default is fp32
-      zero_point_domain (ZeroPointDomain): the domain that zero_point is in, should be either integer or float
-        if zero_point is in integer domain, zero point is added to the quantized integer value during
-        quantization
-        if zero_point is in floating point domain, zero point is subtracted from the floating point (unquantized)
-        value during quantization
-        default is ZeroPointDomain.INT
+      {zero_point_domain_desc}
 
     Output:
       dequantized Tensor, with requested dtype or fp32
-    """
+    """.format(zero_point_domain_desc=ZeroPointDomain.PARAM_DESC)
     return _dequantize_affine(
         input,
         block_size,

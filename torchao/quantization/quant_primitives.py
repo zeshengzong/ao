@@ -91,6 +91,14 @@ class ZeroPointDomain(Enum):
     NONE = auto()
 
 
+_zero_point_domain_param_doc = r"""
+the domain that zero_point is in, should be either integer or float
+  if zero_point is in integer domain, zero point is added to the quantized integer value during quantization
+  if zero_point is in floating point domain, zero point is subtracted from the floating point (unquantized) value during quantization
+  default is ZeroPointDomain.INT
+"""
+
+
 class TorchAODType(Enum):
     """
     Placeholder for dtypes that do not exist in PyTorch core yet.
@@ -1063,13 +1071,8 @@ def _fake_quantize_affine(
       quant_dtype (torch.dtype): desired quantized dtype for determining and validating quant_min and quant_max values.
       quant_min (Optional[int]): minimum quantized value for output Tensor, if not specified, it will be derived from dtype
       quant_max (Optional[int]): maximum quantized value for output Tensor, if not specified, it will be derived from dtype
-      zero_point_domain (ZeroPointDomain): the domain that zero_point is in, should be either integer or float
-        if zero_point is in integer domain, zero point is added to the quantized integer value during
-        quantization
-        if zero_point is in floating point domain, zero point is subtracted from the floating point (unquantized)
-        value during quantization
-        default is ZeroPointDomain.INT
-    """
+      {zero_point_domain_desc}
+    """.format(zero_point_domain_desc=ZeroPointDomain.PARAM_DESC)
     if zero_point_domain is None:
         raise ValueError("Please use ZeroPointDomain.NONE instead of None")
     elif zero_point_domain is ZeroPointDomain.NONE and zero_point is not None:

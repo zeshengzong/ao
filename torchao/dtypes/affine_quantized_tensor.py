@@ -18,6 +18,7 @@ from torchao.quantization.quant_primitives import (
     FP8_TYPES,
     MappingType,
     ZeroPointDomain,
+    _zero_point_domain_param_doc,
     _choose_qparams_affine_dont_preserve_zero,
     _choose_qparams_affine_floatx,
     _choose_qparams_affine_tinygemm,
@@ -58,30 +59,6 @@ __all__ = [
 # Tensor Subclass Definition #
 ##############################
 class AffineQuantizedTensor(TorchAOBaseTensor):
-    """Affine quantized tensor subclass. Affine quantization means we quantize the floating point tensor with an affine transformation:
-    quantized_tensor = float_tensor / scale + zero_point
-
-    To see what happens during choose_qparams, quantization and dequantization for affine quantization,
-    please checkout https://github.com/pytorch/ao/blob/main/torchao/quantization/quant_primitives.py
-    and check the three quant primitive ops: choose_qparams_affine, quantize_affine qand dequantize_affine
-
-    The shape and dtype of the tensor subclass represent how the tensor subclass looks externally,
-    regardless of the internal representation's type or orientation.
-
-    fields:
-        - tensor_impl (AQTTensorImpl): tensor that serves as a general tensor impl storage for the quantized data,
-            e.g. storing plain tensors (int_data, scale, zero_point) or packed formats depending on device and operator/kernel
-        - block_size (Tuple[int, ...]): granularity of quantization, this means the size of the tensor elements that's sharing the same qparam
-            e.g. when size is the same as the input tensor dimension, we are using per tensor quantization
-        - shape (torch.Size): the shape for the original high precision Tensor
-        - quant_min (Optional[int]): minimum quantized value for the Tensor, if not specified, it will be derived from dtype of `int_data`
-        - quant_max (Optional[int]): maximum quantized value for the Tensor, if not specified, it will be derived from dtype of `int_data`
-        - zero_point_domain (ZeroPointDomain): the domain that zero_point is in, should be either integer or float
-            if zero_point is in integer domain, zero point is added to the quantized integer value during quantization
-            if zero_point is in floating point domain, zero point is subtracted from the floating point (unquantized) value during quantization
-            default is ZeroPointDomain.INT
-        - dtype: dtype for original high precision tensor, e.g. torch.float32
-    """
 
     @staticmethod
     def __new__(
@@ -598,6 +575,28 @@ class AffineQuantizedTensor(TorchAOBaseTensor):
     #     kernels in CPU as well, see the note above
     # 2 - we're given non-floats - quantizing long to int8 is crazy
 
+AffineQuantizedTensor.__doc__ = (
+    rf"""Affine quantized tensor subclass. Affine quantization means we quantize the floating point tensor with an affine transformation:
+    quantized_tensor = float_tensor / scale + zero_point
+
+    To see what happens during choose_qparams, quantization and dequantization for affine quantization,
+    please checkout https://github.com/pytorch/ao/blob/main/torchao/quantization/quant_primitives.py
+    and check the three quant primitive ops: choose_qparams_affine, quantize_affine qand dequantize_affine
+
+    The shape and dtype of the tensor subclass represent how the tensor subclass looks externally,
+    regardless of the internal representation's type or orientation.
+
+    fields:
+        - tensor_impl (AQTTensorImpl): tensor that serves as a general tensor impl storage for the quantized data,
+            e.g. storing plain tensors (int_data, scale, zero_point) or packed formats depending on device and operator/kernel
+        - block_size (Tuple[int, ...]): granularity of quantization, this means the size of the tensor elements that's sharing the same qparam
+            e.g. when size is the same as the input tensor dimension, we are using per tensor quantization
+        - shape (torch.Size): the shape for the original high precision Tensor
+        - quant_min (Optional[int]): minimum quantized value for the Tensor, if not specified, it will be derived from dtype of `int_data`
+        - quant_max (Optional[int]): maximum quantized value for the Tensor, if not specified, it will be derived from dtype of `int_data`
+        - zero_point_domain (ZeroPointDomain): {_zero_point_domain_param_doc}
+        - dtype: dtype for original high precision tensor, e.g. torch.float32
+    """)
 
 ######################################################
 # Layout and TensorImpl Subclass Registration #
